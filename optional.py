@@ -1,62 +1,74 @@
+from typing import Iterable, Iterator, List, TypeVar
 import heapq
 import random
 
+T = TypeVar("T")
 
-def merge_k_lists(lists):
+
+def merge_k_lists(lists: Iterable[Iterable[T]]) -> List[T]:
+    """Merge k sorted iterables into a single sorted list.
+
+    Uses a min-heap to repeatedly take the smallest head element among the
+    active iterators. Input iterables must be sorted in ascending order.
+
+    Args:
+        lists: An iterable of sorted iterables (e.g. lists, tuples, generators).
+
+    Returns:
+        A new list containing all elements from the inputs in ascending order.
+
+    Notes:
+        - Empty iterables are ignored.
+        - If input iterables are not sorted, the result will not be globally
+          sorted; ensure inputs are sorted before calling.
     """
-    Merges k sorted lists into a single sorted list using a min-heap.
+    heap: list = []
+    # Build iterators and push first element of each (if any) to the heap.
+    for idx, seq in enumerate(lists):
+        
+        it = iter(sorted(seq))
+        try:
+            first = next(it)
+        except StopIteration:
+            # skip empty iterables
+            continue
+        # Push tuple (value, source_index, iterator) so ties are broken by index
+        heapq.heappush(heap, (first, idx, it))
 
-    The heap stores a tuple for each element:
-    (value, list_index, element_index_in_list)
-    """
+    merged: List[T] = []
+    while heap:
+        value, src_idx, it = heapq.heappop(heap)
+        merged.append(value)
+        try:
+            nxt = next(it)
+        except StopIteration:
+            continue
+        heapq.heappush(heap, (nxt, src_idx, it))
 
-    # Initialize the min-heap
-    min_heap = []
-
-    # Populate the heap with the first element from each input list
-    # The heap is initialized with tuples containing the value, the list index (i),
-    # and the element index within that list (0).
-    for i in range(len(lists)):
-        # Check if the list is not empty
-        if lists[i]:
-            # The tuple is (value, list_index, element_index)
-            heapq.heappush(min_heap, (lists[i][0], i, 0))
-
-    # Initialize the final merged list
-    merged_list = []
-
-    # Extract minimum elements and add next elements to the heap
-    # Loop continues as long as there are elements in the heap
-    while min_heap:
-        # Get the smallest element available from all lists
-        value, list_idx, element_idx = heapq.heappop(min_heap)
-
-        # Add the smallest value to the result list
-        merged_list.append(value)
-
-        # Check if there is a next element in the list the value came from
-        next_element_idx = element_idx + 1
-
-        if next_element_idx < len(lists[list_idx]):
-            # Get the next value from that list
-            next_value = lists[list_idx][next_element_idx]
-
-            # Create the tuple for the next element and push it onto the heap
-            next_tuple = (next_value, list_idx, next_element_idx)
-            heapq.heappush(min_heap, next_tuple)
-
-    # Return merged and sorted list
-    return merged_list
+    return merged
 
 
 # Generate list with random integer values in interval [min, max)
 def rand_list(n, min=0, max=100):
     return [random.randint(min, max) for _ in range(n)]
 
+if __name__ == "__main__":
+    # # Quick demonstration
+    # a = [1, 4, 9, 10]
+    # b = [2, 3, 7]
+    # c = [0, 5, 8, 11, 20]
 
-# Example Usage
-lists = [rand_list(5), rand_list(6), rand_list(2)]
+    # print("Input lists:")
+    # for i, lst in enumerate((a, b, c), 1):
+    #     print(f"  list {i}: {lst}")
 
-print("Початкові списки:", lists)
-merged_list = merge_k_lists(lists)
-print("Відсортований список:", merged_list)
+    # merged = merge_k_lists((a, b, c))
+    # print("\nMerged:")
+    # print(merged)
+
+    # Example Usage
+    lists = [rand_list(10), rand_list(8), rand_list(6)]
+
+    print("Початкові списки:", lists)
+    merged_list = merge_k_lists(lists)
+    print("Відсортований список:", merged_list)
