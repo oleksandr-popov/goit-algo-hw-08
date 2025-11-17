@@ -1,57 +1,58 @@
 import heapq
 
+
 def min_cost_to_connect_cables(cable_lengths):
     """
-    Calculates the minimum cost to connect all cables into a single cable.
-    The cost of connecting two cables is the sum of their lengths.
+    Обчислює мінімальну вартість з'єднання всіх кабелів в один цілий кабель.
+    Вартість з'єднання двох кабелів дорівнює сумі їхніх довжин.
     """
 
-    # Initialize the list as a min-heap
-    # The heap property is essential for efficiently finding the two shortest cables.
+    # Ініціалізуємо список як мін-купу (min-heap)
+    # Властивість купи є критичною для ефективного пошуку двох найкоротших кабелів.
     heapq.heapify(cable_lengths)
 
-    # Define the total cost tracker
+    # Ініціалізуємо лічильник загальної вартості
     total_cost = 0
 
-    # Continue merging until only one cable (the final merged one) remains in the heap
+    # Продовжуємо злиття, доки в купі не залишиться лише один кабель (кінцевий об'єднаний)
     while len(cable_lengths) > 1:
-        # Pop the two smallest cables from the heap
-        # This is an O(log n) operation.
+        # Вилучаємо два найменші кабелі з купи
+        # Це операція складності O(log n).
         first_shortest = heapq.heappop(cable_lengths)
         second_shortest = heapq.heappop(cable_lengths)
 
-        # Calculate the cost of the merge (sum of their lengths)
+        # Обчислюємо вартість злиття (сума їхніх довжин)
         merge_cost = first_shortest + second_shortest
 
-        # Add the merge cost to the running total
+        # Додаємо вартість злиття до загальної суми
         total_cost += merge_cost
 
-        # Push the newly merged cable's length back onto the heap
-        # This represents the new cable that can be merged in the next steps.
+        # Додаємо довжину новооб'єднаного кабелю назад до купи
+        # Це представляє новий кабель, який може бути об'єднаний на наступних кроках.
         heapq.heappush(cable_lengths, merge_cost)
 
-        # Print intermediate results for tracing the process
+        # Виводимо проміжні результати для відстеження процесу
         print(
-            f"Об'єднання кабелів {first_shortest} та {second_shortest} буде коштувати {merge_cost}. Загалом: {total_cost}"
+            f"Об'єднання кабелів {first_shortest} та {second_shortest} коштує {merge_cost}. Загальна вартість: {total_cost}"
         )
-        print(f"Поточна дліна кабелів: {cable_lengths}")
+        print(f"Поточні довжини кабелів у купі: {cable_lengths}")
 
-    # The final result is the total cost accumulated
+    # Кінцевий результат – це загальна накопичена вартість
     return total_cost
 
 
 if __name__ == "__main__":
-    # Example cable lengths
+    # Приклад довжин кабелів
     initial_lengths = [7, 1, 6, 4]
 
-    # Variant to use randomize values for cable lengths
+    # Варіант використання випадкових значень для довжин кабелів
     # import random
     # initial_lengths = [random.randint(1, 25) for _ in range(6)]
-    print(f"Initial cable lengths: {initial_lengths}")
+    print(f"Початкові довжини кабелів: {initial_lengths}")
     print("-" * 50)
 
-    # Run the function
+    # Запускаємо функцію
     min_cost = min_cost_to_connect_cables(initial_lengths)
 
     print("-" * 50)
-    print("Мінімальни витрати для об'єднання усіх кабелів:", min_cost)
+    print("Мінімальні витрати для об'єднання усіх кабелів:", min_cost)
